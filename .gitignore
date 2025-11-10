@@ -1,0 +1,17 @@
+# Ignorar archivos del entorno de Python
+venv/
+__pycache__/
+*.pyc
+
+# Archivos de entorno y secretos (¡CRÍTICO!)
+.env
+.DS_Store
+
+# Base de datos local de Django
+db.sqlite3
+
+# Archivos estáticos generados
+/staticfiles/
+
+# Archivos de sistema operativo
+.vscode/

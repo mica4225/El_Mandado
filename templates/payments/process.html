@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Procesar Pago - El Mandado{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <i class="bi bi-credit-card fs-1 text-green mb-4"></i>
+                    <h2 class="text-dark-brown mb-4">Procesar Pago</h2>
+                    
+                    <div class="alert alert-info-custom mb-4">
+                        <p class="mb-2"><strong>Orden:</strong> #{{ orden.pk }}</p>
+                        <p class="mb-0"><strong>Total:</strong> <span class="fs-4 text-green">${{ orden.total }}</span></p>
+                    </div>
+                    
+                    <div class="alert alert-warning mb-4">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Modo Simulado:</strong> Esta es una simulación de pago con MercadoPago.
+                        En producción, aquí se redirigiría a la pasarela de pago real.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'payment_success' orden.pk %}" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle"></i> Simular Pago Exitoso
+                        </a>
+                        <a href="{% url 'payment_failure' orden.pk %}" class="btn btn-outline-danger">
+                            <i class="bi bi-x-circle"></i> Simular Pago Fallido
+                        </a>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-muted small">
+                        <p class="mb-1">
+                            <i class="bi bi-shield-check"></i> Pago seguro con encriptación SSL
+                        </p>
+                        <p class="mb-0">
+                            <i class="bi bi-lock"></i> Tus datos están protegidos
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

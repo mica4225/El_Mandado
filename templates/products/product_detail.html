@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ producto.nombre }} El Mandado {% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'product_list' %}">Productos</a></li>
+            <li class="breadcrumb-item active">{{ producto.nombre }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Galería de imágenes -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                {% if producto.imagen_principal %}
+                    <img src="{{ producto.imagen_principal.url }}" 
+                         alt="{{ producto.nombre }}" 
+                         class="img-fluid main-product-image" 
+                         id="mainImage">
+                {% else %}
+                    <img src="https://via.placeholder.com/600x400/a8c69f/2d5016?text=Sin+Imagen" 
+                         alt="{{ producto.nombre }}" 
+                         class="img-fluid main-product-image" 
+                         id="mainImage">
+                {% endif %}
+            </div>
+            
+            {% if imagenes %}
+            <div class="row g-2 mt-2">
+                <div class="col-3">
+                    {% if producto.imagen_principal %}
+                    <img src="{{ producto.imagen_principal.url }}" 
+                         class="img-thumbnail gallery-thumb active" 
+                         onclick="changeImage(this)">
+                    {% else %}
+                    <img src="https://via.placeholder.com/100x100/a8c69f/2d5016?text=?" 
+                         class="img-thumbnail gallery-thumb active" 
+                         onclick="changeImage(this)">
+                    {% endif %}
+                </div>
+                {% for img in imagenes %}
+                <div class="col-3">
+            {% if img.imagen %}  <!-- ✅ VALIDAR QUE EXISTA -->
+            <img src="{{ img.imagen.url }}" 
+                 class="img-thumbnail gallery-thumb" 
+                 onclick="changeImage(this)">
+            {% else %}
+            <img src="https://via.placeholder.com/100x100/a8c69f/2d5016?text=?" 
+                 class="img-thumbnail gallery-thumb" 
+                 onclick="changeImage(this)">
+            {% endif %}
+                </div>
+            {% endfor %}    
+            </div>
+            {% endif %}
+            </div>
+        
+        <!-- Información del producto -->
+        <div class="col-md-6">
+            <span class="badge bg-success-custom mb-2">{{ producto.categoria.nombre }}</span>
+            <h1 class="text-dark-brown mb-3">{{ producto.nombre }}</h1>
+            
+            <div class="mb-3">
+                {% if producto.promedio_rating > 0 %}
+                <div class="rating d-inline-block">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= producto.promedio_rating %}
+                        <i class="bi bi-star-fill text-warning"></i>
+                        {% else %}
+                        <i class="bi bi-star text-warning"></i>
+                        {% endif %}
+                    {% endfor %}
+                    <span class="text-muted ms-2">({{ reviews.count }} reseñas)</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <h2 class="text-green mb-4">${{ producto.precio }}</h2>
+            
+            <p class="text-muted">{{ producto.descripcion }}</p>
+            
+            <div class="alert alert-light border">
+                <strong>Vendedor:</strong> {{ producto.vendedor.username }}<br>
+                <strong>Stock disponible:</strong> {{ producto.stock }} unidades
+            </div>
+            
+            {% if producto.disponible %}
+                {% if user.is_authenticated %}
+                <div class="d-grid gap-2 mb-3">
+                    <!-- Botón Comprar Ahora (abre modal) -->
+                    <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#buyNowModal">
+                        <i class="bi bi-lightning-charge-fill"></i> Comprar Ahora
+                    </button>
+        
+                    <!-- Botón Agregar al Carrito -->
+                    <form method="post" action="{% url 'add_to_cart' producto.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary-custom btn-lg w-100">
+                            <i class="bi bi-cart-plus"></i> Agregar al Carrito
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary-custom btn-lg w-100">
+                    <i class="bi bi-box-arrow-in-right"></i> Iniciá sesión para comprar
+                </a>
+                {% endif %}
+            {% else %}
+            <button class="btn btn-secondary btn-lg w-100" disabled>
+                Sin Stock
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    
+<!-- Reseñas -->
+<div class="row mt-5">
+    <div class="col-12">
+        <h3 class="text-dark-brown mb-4">
+            <i class="bi bi-chat-left-text"></i> Reseñas de Clientes
+        </h3>
+        
+        {% if user.is_authenticated %}
+            <!-- Verificar si el usuario ya dejó review -->
+            {% with user_has_review=False %}
+                {% for review in reviews %}
+                    {% if review.usuario == user %}
+                        {% with user_has_review=True %}{% endwith %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if not user_has_review %}
+                <div class="mb-4">
+                    <a href="{% url 'create_review' producto.pk %}" class="btn btn-outline-primary-custom">
+                        <i class="bi bi-plus-circle"></i> Escribir Reseña
+                    </a>
+                </div>
+                {% endif %}
+            {% endwith %}
+        {% endif %}
+        
+        {% if reviews %}
+        <div class="row g-3">
+            {% for review in reviews %}
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <strong class="text-dark-brown">{{ review.usuario.username }}</strong>
+                                <div class="rating">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= review.rating %}
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        {% else %}
+                                        <i class="bi bi-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ review.creado_en|date:"d/m/Y" }}</small>
+                        </div>
+                        <p class="text-muted mb-0">{{ review.comentario }}</p>
+                        
+                        {% if review.usuario == user %}
+                        <div class="mt-2">
+                            <a href="{% url 'delete_review' review.pk %}" 
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('¿Eliminar reseña?')">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">Todavía no hay reseñas para este producto.</p>
+        {% endif %}
+    </div>
+</div>
+<div class="modal fade" id="buyNowModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-lightning-charge-fill"></i> Comprar Ahora
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'buy_now' producto.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        {% if producto.imagen_principal %}
+                        <img src="{{ producto.imagen_principal.url }}" 
+                             alt="{{ producto.nombre }}" 
+                             class="img-fluid rounded"
+                             style="max-height: 150px;">
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="text-center mb-3">{{ producto.nombre }}</h5>
+                    <p class="text-center fs-4 text-success fw-bold mb-4">
+                        ${{ producto.precio }}
+                    </p>
+                    
+                    <div class="mb-3">
+                        <label for="cantidad_modal" class="form-label">Cantidad:</label>
+                        <input type="number" 
+                               id="cantidad_modal" 
+                               name="cantidad" 
+                               value="1" 
+                               min="1" 
+                               max="{{ producto.stock }}" 
+                               class="form-control form-control-lg text-center">
+                        <small class="text-muted">Stock disponible: {{ producto.stock }}</small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        Serás redirigido al checkout para completar tu compra
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-lightning-charge-fill"></i> Confirmar Compra
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeImage(element) {
+    document.getElementById('mainImage').src = element.src;
+    document.querySelectorAll('.gallery-thumb').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    element.classList.add('active');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Productos - El Mandado{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-dark-brown">
+            <i class="bi bi-box-seam"></i> Mis Productos
+        </h2>
+        <a href="{% url 'product_create' %}" class="btn btn-primary-custom">
+            <i class="bi bi-plus-circle"></i> Nuevo Producto
+        </a>
+    </div>
+    
+    {% if productos %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>
+                        {% if producto.imagen_principal %}
+                        <img src="{{ producto.imagen_principal.url }}" 
+                             alt="{{ producto.nombre }}" 
+                             class="img-thumbnail" 
+                             style="width: 60px; height: 60px; object-fit: cover;">
+                        {% else %}
+                        <img src="https://via.placeholder.com/60x60/a8c69f/2d5016?text=?" 
+                             alt="{{ producto.nombre }}" 
+                             class="img-thumbnail" 
+                             style="width: 60px; height: 60px; object-fit: cover;">
+                        {% endif %}
+                    </td>
+                    <td>{{ producto.nombre }}</td>
+                    <td>{{ producto.categoria.nombre }}</td>
+                    <td>${{ producto.precio }}</td>
+                    <td>{{ producto.stock }}</td>
+                    <td>
+                        {% if producto.activo %}
+                        <span class="badge bg-success">Activo</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'product_detail' producto.pk %}" 
+                               class="btn btn-outline-info" 
+                               title="Ver">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'product_edit' producto.pk %}" 
+                               class="btn btn-outline-primary" 
+                               title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'product_add_images' producto.pk %}" 
+                               class="btn btn-outline-secondary" 
+                               title="Imágenes">
+                                <i class="bi bi-images"></i>
+                            </a>
+                            <a href="{% url 'product_delete' producto.pk %}" 
+                               class="btn btn-outline-danger" 
+                               title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-inbox fs-1 text-muted"></i>
+        <p class="text-muted mt-3">Todavía no publicaste ningún producto</p>
+        <a href="{% url 'product_create' %}" class="btn btn-primary-custom">
+            <i class="bi bi-plus-circle"></i> Crear Mi Primer Producto
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

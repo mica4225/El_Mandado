@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Error en el Pago - El Mandado{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <i class="bi bi-x-circle fs-1 text-danger mb-4"></i>
+                    
+                    <h2 class="text-dark-brown mb-3">Error en el Pago</h2>
+                    <p class="text-muted mb-4">No se pudo procesar tu pago. Por favor, intentá nuevamente.</p>
+                    
+                    <div class="alert alert-danger mb-4">
+                        <p class="mb-0">
+                            <strong>Orden:</strong> #{{ orden.pk }} - Estado: {{ orden.get_estado_display }}
+                        </p>
+                    </div>
+                    
+                    <p class="text-muted small mb-4">
+                        Si el problema persiste, contactá con soporte o intentá con otro método de pago.
+                    </p>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'payment_process' orden.pk %}" class="btn btn-primary-custom btn-lg">
+                            <i class="bi bi-arrow-repeat"></i> Reintentar Pago
+                        </a>
+                        <a href="{% url 'cart_view' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-cart3"></i> Volver al Carrito
+                        </a>
+                        <a href="{% url 'home' %}" class="btn btn-outline-primary-custom">
+                            <i class="bi bi-house"></i> Ir al Inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

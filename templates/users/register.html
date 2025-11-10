@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}Registro - Mercadito{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card border-0 shadow-sm animate-fade-in">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4 text-dark-brown">
+                        <i class="bi bi-person-plus"></i> Crear Cuenta
+                    </h2>
+                    
+                    <!-- Opción rápida: Registro Social -->
+                    <div class="social-login-section mb-4">
+                        <div class="alert alert-info-custom text-center py-3">
+                            <p class="mb-2 fw-bold">🎉 Registrate en segundos:</p>
+                            <div class="d-grid gap-2">
+                                <a href="{% provider_login_url 'google' %}" class="btn btn-lg btn-danger">
+                                    <i class="bi bi-google me-2"></i> Registrarse con Google
+                                </a>
+                                <a href="{% provider_login_url 'github' %}" class="btn btn-lg btn-dark">
+                                    <i class="bi bi-github me-2"></i> Registrarse con GitHub
+                                </a>
+                            </div>
+                            <p class="mb-0 mt-2 small text-muted">
+                                No compartimos tus datos
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Separador -->
+                    <div class="divider-with-text my-4">
+                        <span class="divider-text text-muted">O creá tu cuenta manualmente</span>
+                    </div>
+                    
+                    <!-- Formulario tradicional -->
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+                            
+                            {% if field.name == 'rol' %}
+                                <!-- Renderizar rol como cards -->
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="form-check role-card">
+                                            <input class="form-check-input" type="radio" name="rol" id="rol_cliente" value="cliente" checked>
+                                            <label class="form-check-label w-100" for="rol_cliente">
+                                                <div class="text-center p-3">
+                                                    <i class="bi bi-cart3 fs-1 text-green"></i>
+                                                    <p class="fw-bold mb-1">Cliente</p>
+                                                    <small class="text-muted">Comprar productos</small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check role-card">
+                                            <input class="form-check-input" type="radio" name="rol" id="rol_vendedor" value="vendedor">
+                                            <label class="form-check-label w-100" for="rol_vendedor">
+                                                <div class="text-center p-3">
+                                                    <i class="bi bi-shop fs-1 text-green"></i>
+                                                    <p class="fw-bold mb-1">Vendedor</p>
+                                                    <small class="text-muted">Vender y comprar</small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                            
+                            {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            
+                            {% for error in field.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                        
+                        <button type="submit" class="btn btn-primary-custom w-100 btn-lg mt-3">
+                            <i class="bi bi-check-circle"></i> Crear Cuenta
+                        </button>
+                    </form>
+                    
+                    <!-- Link a login -->
+                    <hr class="my-4">
+                    <p class="text-center text-muted mb-0">
+                        ¿Ya tenés cuenta? 
+                        <a href="{% url 'login' %}" class="text-green text-decoration-none fw-bold">
+                            Iniciá sesión
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Divider con texto */
+.divider-with-text {
+    position: relative;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.divider-with-text::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #dee2e6;
+}
+
+.divider-text {
+    position: relative;
+    background-color: white;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+}
+
+/* Cards de roles */
+.role-card {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.role-card:hover {
+    border-color: #642F37;
+    box-shadow: 0 4px 12px rgba(74, 124, 59, 0.2);
+}
+
+.role-card input[type="radio"]:checked + label {
+    background-color: white;
+}
+
+.role-card input[type="radio"] {
+    display: none;
+}
+
+.role-card label {
+    cursor: pointer;
+    margin: 0;
+}
+
+/* Botones sociales */
+.btn-danger {
+    background: #db4437;
+    border: none;
+}
+
+.btn-danger:hover {
+    background: #c23321;
+}
+
+.btn-dark {
+    background: #24292e;
+    border: none;
+}
+
+.btn-dark:hover {
+    background: #1a1e22;
+}
+
+/* Alert custom */
+.alert-info-custom {
+    background-color: #f5f5dc;
+    border: 1px solid #C0350F;
+    border-radius: 8px;
+}
+
+.alert-success-custom {
+    background-color: #e8f5e9;
+    border: 1px solid #642F37;
+    border-radius: 8px;
+}
+</style>
+{% endblock %}

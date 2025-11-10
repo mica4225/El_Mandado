@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Cuentas Conectadas - Mercadito{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="text-dark-brown mb-4">
+                <i class="bi bi-link-45deg"></i> Cuentas Conectadas
+            </h2>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    {% if form.accounts %}
+                    <p class="text-muted mb-4">
+                        Estas son las cuentas externas que tenés conectadas:
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% for account in form.accounts %}
+                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 border rounded">
+                            <div>
+                                {% if account.provider == 'google' %}
+                                <i class="bi bi-google text-danger fs-4 me-2"></i>
+                                {% elif account.provider == 'github' %}
+                                <i class="bi bi-github fs-4 me-2" style="color: #24292e;"></i>
+                                {% endif %}
+                                <strong>{{ account.get_provider_account }}</strong>
+                            </div>
+                            
+                            <button type="submit" name="account" value="{{ account.id }}" 
+                                    class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-trash"></i> Desconectar
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </form>
+                    {% else %}
+                    <p class="text-muted text-center py-4">
+                        <i class="bi bi-info-circle fs-3 d-block mb-3"></i>
+                        No tenés cuentas externas conectadas
+                    </p>
+                    {% endif %}
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3">Conectar otra cuenta:</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger">
+                            <i class="bi bi-google"></i> Google
+                        </a>
+                        <a href="{% provider_login_url 'github' %}" class="btn btn-outline-dark">
+                            <i class="bi bi-github"></i> GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver al Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

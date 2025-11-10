@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}Iniciar Sesión - Mercadito{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-sm animate-fade-in">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4 text-dark-brown">
+                        <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                    </h2>
+                    
+                    <!-- Opción rápida: Login Social -->
+                    <div class="social-login-section mb-4">
+                        <div class="alert alert-info-custom text-center py-3">
+                            <p class="mb-2 fw-bold">🚀 Forma rápida y segura:</p>
+                            <div class="d-grid gap-2">
+                                <a href="{% provider_login_url 'google' %}" class="btn btn-lg btn-danger">
+                                    <i class="bi bi-google me-2"></i> Continuar con Google
+                                </a>
+                                <a href="{% provider_login_url 'github' %}" class="btn btn-lg btn-dark">
+                                    <i class="bi bi-github me-2"></i> Continuar con GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Separador -->
+                    <div class="divider-with-text my-4">
+                        <span class="divider-text text-muted">O ingresá con tu usuario</span>
+                    </div>
+                    
+                    <!-- Formulario tradicional -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Usuario o Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary-custom w-100 mb-3">
+                            <i class="bi bi-check-circle"></i> Ingresar
+                        </button>
+                    </form>
+                    
+                    <!-- Links adicionales -->
+                    <div class="text-center">
+                        <p class="text-muted mb-2 small">
+                            ¿No tenés cuenta? 
+                            <a href="{% url 'register' %}" class="text-green text-decoration-none fw-bold">
+                                Registrate aquí
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Divider con texto */
+.divider-with-text {
+    position: relative;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.divider-with-text::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #dee2e6;
+}
+
+.divider-text {
+    position: relative;
+    background-color: white;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+}
+
+/* Botones sociales */
+.btn-danger {
+    background: #db4437;
+    border: none;
+}
+
+.btn-danger:hover {
+    background: #c23321;
+}
+
+.btn-dark {
+    background: #24292e;
+    border: none;
+}
+
+.btn-dark:hover {
+    background: #1a1e22;
+}
+</style>
+{% endblock %}

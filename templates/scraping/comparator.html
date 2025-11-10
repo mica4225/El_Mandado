@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Comparador de Precios - El Mandado{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-5 text-dark-brown mb-3">
+            <i class="bi bi-graph-up"></i> Comparador de Precios
+        </h1>
+        <p class="lead text-muted">Compará precios de supermercados y productos locales</p>
+    </div>
+    
+    <!-- Búsqueda -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-6">
+            <form method="get" class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="input-group input-group-lg">
+                        <input type="text" 
+                               name="q" 
+                               class="form-control" 
+                               placeholder="Ej: arroz, leche, pan..." 
+                               value="{{ query }}"
+                               required>
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="bi bi-search"></i> Comparar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if data %}
+    <!-- Resultados de Supermercados -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="text-dark-brown mb-4">
+                <i class="bi bi-shop-window"></i> Supermercados
+            </h3>
+            
+            {% if data.resultados %}
+            <div class="row g-4">
+                {% for resultado in data.resultados %}
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 {% if resultado.precio == data.mejor_precio %}border-success{% endif %}">
+                        <div class="card-body p-4">
+                            {% if resultado.precio == data.mejor_precio %}
+                            <span class="badge bg-success-custom mb-2">
+                                <i class="bi bi-trophy"></i> Mejor Precio
+                            </span>
+                            {% endif %}
+                            
+                            <h5 class="text-dark-brown mb-3">{{ resultado.supermercado }}</h5>
+                            
+                            {% if resultado.precio %}
+                            <div class="display-6 text-green mb-3">${{ resultado.precio }}</div>
+                            {% else %}
+                            <div class="text-muted mb-3">Precio no disponible</div>
+                            {% endif %}
+                            
+                            {% if resultado.nota %}
+                            <small class="text-muted d-block mb-3">
+                                <i class="bi bi-info-circle"></i> {{ resultado.nota }}
+                            </small>
+                            {% endif %}
+                            
+                            {% if not resultado.real %}
+                            <small class="badge bg-warning text-dark">
+                                <i class="bi bi-exclamation-triangle"></i> Simulado
+                            </small>
+                            {% endif %}
+                            
+                            <a href="{{ resultado.url }}" target="_blank" class="btn btn-outline-primary-custom w-100 mt-3">
+                                <i class="bi bi-box-arrow-up-right"></i> Ver en Sitio
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> No se encontraron resultados en supermercados
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Resultados del Marketplace Local -->
+    {% if productos_marketplace %}
+    <div class="row">
+        <div class="col-12">
+            <h3 class="text-dark-brown mb-4">
+                <i class="bi bi-basket3"></i> Productos Locales
+            </h3>
+            
+            <div class="row g-4">
+                {% for producto in productos_marketplace %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="product-card">
+                        <a href="{% url 'product_detail' producto.pk %}">
+                            <img src="{{ producto.imagen_principal.url }}" 
+                                 alt="{{ producto.nombre }}" 
+                                 class="product-img">
+                        </a>
+                        <div class="product-body">
+                            <span class="badge bg-success-custom mb-2">Local</span>
+                            <h5 class="product-title">
+                                <a href="{% url 'product_detail' producto.pk %}" 
+                                   class="text-decoration-none text-dark">
+                                    {{ producto.nombre }}
+                                </a>
+                            </h5>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="product-price">${{ producto.precio }}</span>
+                                <small class="text-muted">Stock: {{ producto.stock }}</small>
+                            </div>
+                            
+                            {% if producto.promedio_rating > 0 %}
+                            <div class="rating mt-2">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= producto.promedio_rating %}
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    {% else %}
+                                    <i class="bi bi-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <small class="text-muted d-block mt-2">
+                                Por: {{ producto.vendedor.username }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+    
+    <!-- Info -->
+    {% if not data %}
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <i class="bi bi-lightbulb fs-1 text-green mb-3"></i>
+                    <h4 class="text-dark-brown mb-3">¿Cómo funciona?</h4>
+                    <p class="text-muted mb-0">
+                        Ingresá el nombre de un producto y comparamos precios entre supermercados 
+                        y vendedores locales del marketplace. Encontrá la mejor oferta en un solo lugar.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

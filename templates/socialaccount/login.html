@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}Conectar con {{ provider.name }} - Mercadito{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-sm animate-fade-in">
+                <div class="card-body p-5 text-center">
+                    <!-- Logo del provider -->
+                    {% if provider.id == 'google' %}
+                    <i class="bi bi-google display-1 text-danger mb-4"></i>
+                    {% elif provider.id == 'github' %}
+                    <i class="bi bi-github display-1 mb-4" style="color: #24292e;"></i>
+                    {% else %}
+                    <i class="bi bi-shield-check display-1 text-green mb-4"></i>
+                    {% endif %}
+                    
+                    <h2 class="text-dark-brown mb-3">
+                        Iniciar sesión con {{ provider.name }}
+                    </h2>
+                    
+                    <p class="text-muted mb-4">
+                        Estás a punto de iniciar sesión en <strong>Mercadito</strong> usando tu cuenta de {{ provider.name }}.
+                    </p>
+                    
+                    <div class="alert alert-info-custom mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <small>
+                            Usaremos tu email y nombre público. No compartimos tu información.
+                        </small>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="d-grid gap-2">
+                            {% if provider.id == 'google' %}
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-google me-2"></i> Continuar con Google
+                            </button>
+                            {% elif provider.id == 'github' %}
+                            <button type="submit" class="btn btn-dark btn-lg">
+                                <i class="bi bi-github me-2"></i> Continuar con GitHub
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn btn-primary-custom btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i> Continuar
+                            </button>
+                            {% endif %}
+                            
+                            <a href="{% url 'login' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Agregar Imágenes - El Mandado{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="text-dark-brown mb-3">Imágenes de: {{ producto.nombre }}</h2>
+                    <p class="text-muted">Podés agregar hasta 8 imágenes adicionales para tu producto.</p>
+                    
+                    <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle"></i> 
+        <strong>Imágenes adicionales (opcional):</strong> 
+        Podés agregar hasta 8 imágenes más para tu producto, o finalizar sin agregar ninguna.
+    </div>
+    
+    {% for field in form %}
+    <div class="mb-3">
+        <label for="{{ field.id_for_label }}" class="form-label">
+            {{ field.label }} <span class="text-muted">(opcional)</span>
+        </label>
+        {{ field }}
+        {% for error in field.errors %}
+        <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    
+    <div class="d-flex gap-2">
+        <button type="submit" name="agregar" class="btn btn-primary-custom">
+            <i class="bi bi-plus-circle"></i> Agregar Imagen
+        </button>
+        <button type="submit" name="finalizar" class="btn btn-primary-custom">
+            <i class="bi bi-check-circle"></i> Finalizar sin agregar más
+        </button>
+    </div>
+</form>
+                </div>
+            </div>
+            
+            <!-- Galería actual -->
+            {% if imagenes %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="text-dark-brown mb-3">Imágenes Actuales ({{ imagenes.count }}/8)</h4>
+                    <div class="row g-3">
+                        {% for img in imagenes %}
+                        <div class="col-md-4 col-lg-3">
+                            <div class="position-relative">
+                                <img src="{{ img.imagen.url }}" 
+                                     alt="Imagen {{ forloop.counter }}" 
+                                     class="img-thumbnail">
+                                <a href="{% url 'product_delete_image' img.pk %}" 
+                                   class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                                   onclick="return confirm('¿Eliminar imagen?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

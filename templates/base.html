@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es-ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}El Mandado{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.CSS' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+                <i class="bi bi-basket3 me-2 fs-3"></i>
+                <span class="brand-text">Mercadito - El Mandado </span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">
+                            <i class="bi bi-house-door"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'product_list' %}">
+                            <i class="bi bi-shop"></i> Productos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'price_comparator' %}">
+                            <i class="bi bi-graph-up"></i> Comparador
+                        </a>
+                    </li>
+                    
+                    {% if user.is_authenticated %}
+                        {% if user.puede_vender %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'my_products' %}">
+                                <i class="bi bi-box-seam"></i> Mis Productos
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'cart_view' %}">
+                                <i class="bi bi-cart3 fs-5"></i>
+                                {% if cart_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ cart_count }}
+                                </span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'profile' %}">Mi Perfil</a></li>
+                                <li><a class="dropdown-item" href="{% url 'order_list' %}">Mis Órdenes</a></li>
+                                {% if user.puede_vender %}
+                                <li><a class="dropdown-item" href="{% url 'seller_orders' %}">Mis Ventas</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesión</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="bi bi-box-arrow-in-right"></i> Ingresar
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary-custom btn-sm ms-2" href="{% url 'register' %}">
+                                Registrarse
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate-fade-in" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-custom mt-5">
+        <div class="container py-4">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5 class="text-main-medium"><i class="bi bi-basket3"></i> El Mandado</h5>
+                    <p class="text-light">Tu marketplace local de confianza</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5 class="text-main-medium"></i>Enlaces</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'about' %}" class="text-light text-decoration-none">Acerca de</a></li>
+                        <li><a href="{% url 'product_list' %}" class="text-light text-decoration-none">Productos</a></li>
+                        <li><a href="{% url 'price_comparator' %}" class="text-light text-decoration-none">Comparador</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5 class="text-main-medium text-accent">Contacto</h5>
+                    <p class="text-light mb-1"><i class="bi bi-envelope"></i> maf.micaela@gmail.com</p>
+                    <p class="text-light"><i class="bi bi-phone"></i> +54 11 1234-5678</p>
+                </div>
+            </div>
+            
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

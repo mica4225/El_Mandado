@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio - El Mandado{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center"> 
+            <div class="col-lg-6 col-12 d-flex flex-column align-items-center mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold text-dark-brown animate-slide-in">
+                    Bienvenido a 
+                </h1>
+                <img src="{% static 'images/El Mandado.png' %}" alt="Logo" class="img-fluid animate-fade-in w-100 mt-1 mb-2">
+            </div>
+            <div class="col-lg-6 col-12 text-lg-end"> 
+                <p class="fs-4 fw-bold text-muted mb-2 text-center">
+                    Tu casa, tu mercado. <br>
+                    Comprar y vender de todo en un solo lugar nunca fue más facil. 🌿
+                </p>
+                <div class="d-flex gap-2 justify-content-center justify-content"> 
+                    <a href="{% url 'product_list' %}" class="btn btn-primary-custom btn-lg">
+                        <i class="bi bi-shop"></i> Ver Productos
+                    </a>
+                    <a href="{% url 'price_comparator' %}" class="btn btn-outline-secondary-custom btn-lg">
+                        <i class="bi bi-graph-up"></i> Comparar Precios
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Categorías -->
+<section class="categories-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-4 text-white">Explorá por Categoría</h2> 
+        <div class="row g-3">
+            {% for categoria in categorias %}
+            <div class="col-md-4 col-lg-2">
+                <a href="{% url 'product_list' %}?categoria={{ categoria.id }}" class="text-decoration-none">
+                    <div class="category-card text-center p-3 bg-white"> 
+                        <i class="bi {{ categoria.icono|default:'bi-tag' }} fs-1 text-main-medium"></i>
+                        <p class="mt-2 mb-0 text-dark-brown">{{ categoria.nombre }}</p>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Productos Destacados -->
+<section class="featured-products py-5 bg-light-cream">
+    <div class="container">
+        <h2 class="text-center mb-4 text-dark-brown">Productos Destacados</h2>
+        <div class="row g-4">
+            {% for producto in productos %}
+            <div class="col-md-6 col-lg-3">
+                <div class="product-card">
+                    <a href="{% url 'product_detail' producto.pk %}">
+                        {% if producto.imagen_principal %}
+                        <img src="{{ producto.imagen_principal.url }}" alt="{{ producto.nombre }}" class="product-img">
+                        {% else %}
+                        <img src="{% static 'images/placeholder.png' %}" alt="{{ producto.nombre }}" class="product-img">
+                        {% endif %}
+                    </a>
+                    <div class="product-body">
+                        <span class="badge bg-success-custom mb-2">{{ producto.categoria.nombre }}</span>
+                        <h5 class="product-title">
+                            <a href="{% url 'product_detail' producto.pk %}" class="text-decoration-none text-dark">
+                                {{ producto.nombre|truncatewords:5 }}
+                            </a>
+                        </h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="product-price">${{ producto.precio }}</span>
+                            <small class="text-muted">Stock: {{ producto.stock }}</small>
+                        </div>
+                        {% if producto.promedio_rating > 0 %}
+                        <div class="rating mt-2">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= producto.promedio_rating %}
+                                <i class="bi bi-star-fill text-warning"></i>
+                                {% else %}
+                                <i class="bi bi-star text-warning"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'product_list' %}" class="btn btn-outline-primary-custom">
+                Ver Todos los Productos <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+{% if not user.is_authenticated %}
+<section class="cta-section py-5">
+    <div class="container text-center">
+        <h2 class="text-light mb-3">¿Querés vender tus productos?</h2>
+        <p class="text-light mb-4">Registrate como vendedor y empezá a ganar hoy mismo</p>
+        <a href="{% url 'register' %}" class="btn btn-light btn-lg">
+            <i class="bi bi-person-plus"></i> Registrarse Ahora
+        </a>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

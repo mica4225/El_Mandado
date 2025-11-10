@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Orden #{{ orden.pk }} - El  Mandado{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-dark-brown">
+            <i class="bi bi-receipt"></i> Orden #{{ orden.pk }}
+        </h2>
+        <a href="{% url 'download_order_summary' orden.pk %}" class="btn btn-primary-custom">
+            <i class="bi bi-download"></i> Descargar PDF
+        </a>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <!-- Productos -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h4 class="text-dark-brown mb-4">Productos</h4>
+                    {% for item in orden.items.all %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                        <div>
+                            <h6 class="mb-1">{{ item.cantidad }}x {{ item.nombre_producto }}</h6>
+                            <small class="text-muted">Vendedor: {{ item.vendedor.username }}</small>
+                        </div>
+                        <div class="text-end">
+                            <p class="mb-0">${{ item.precio_unitario }} c/u</p>
+                            <strong class="text-green">${{ item.subtotal }}</strong>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Dirección de envío -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="text-dark-brown mb-3">Dirección de Envío</h4>
+                    <p class="mb-1"><strong>{{ orden.usuario.get_full_name|default:orden.usuario.username }}</strong></p>
+                    <p class="mb-1">{{ orden.direccion_envio }}</p>
+                    <p class="mb-1">{{ orden.ciudad }} - CP: {{ orden.codigo_postal }}</p>
+                    <p class="mb-0">Tel: {{ orden.telefono }}</p>
+                    {% if orden.notas %}
+                    <hr>
+                    <p class="text-muted mb-0"><strong>Notas:</strong> {{ orden.notas }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Estado y resumen -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <h5 class="text-dark-brown mb-3">Estado de la Orden</h5>
+                    {% if orden.estado == 'pendiente' %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-clock"></i> Pendiente de pago
+                    </div>
+                    {% elif orden.estado == 'enviado' %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-truck"></i> En camino
+                    </div>
+                    {% elif orden.estado == 'completado' %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> Entregado
+                    </div>
+                    {% else %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle"></i> Cancelado
+                    </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>${{ orden.total }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Envío:</span>
+                        <span class="text-success">Gratis</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong class="fs-5">Total:</strong>
+                        <strong class="fs-5 text-green">${{ orden.total }}</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="text-dark-brown mb-3">Información</h6>
+                    <p class="small text-muted mb-1">
+                        <strong>Fecha:</strong> {{ orden.creado_en|date:"d/m/Y H:i" }}
+                    </p>
+                    <p class="small text-muted mb-0">
+                        <strong>Última actualización:</strong> {{ orden.actualizado_en|date:"d/m/Y H:i" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

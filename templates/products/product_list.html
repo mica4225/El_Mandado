@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Productos - El Mandado{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header y búsqueda -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="text-dark-brown">Todos los Productos</h2>
+        </div>
+        <div class="col-md-4">
+            <form method="get" class="d-flex">
+                <input type="text" name="q" class="form-control me-2" 
+                       placeholder="Buscar productos..." value="{{ busqueda|default:'' }}">
+                <button type="submit" class="btn btn-primary-custom">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Sidebar categorías -->
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-green text-white">
+                    <i class="bi bi-filter"></i> Categorías
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'product_list' %}" 
+                       class="list-group-item list-group-item-action {% if not categoria_seleccionada %}active{% endif %}">
+                        Todas
+                    </a>
+                    {% for cat in categorias %}
+                    <a href="?categoria={{ cat.id }}" 
+                       class="list-group-item list-group-item-action {% if categoria_seleccionada == cat.id|stringformat:'s' %}active{% endif %}">
+                        {{ cat.nombre }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Grid de productos -->
+        <div class="col-md-9">
+            {% if productos %}
+            <div class="row g-4">
+                {% for producto in productos %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="product-card">
+                        <a href="{% url 'product_detail' producto.pk %}">
+                            {% if producto.imagen_principal %}
+                            <img src="{{ producto.imagen_principal.url }}" alt="{{ producto.nombre }}" class="product-img">
+                            {% endif %}
+                        </a>
+                        <div class="product-body">
+                            <span class="badge bg-success-custom mb-2">{{ producto.categoria.nombre }}</span>
+                            <h5 class="product-title">
+                                <a href="{% url 'product_detail' producto.pk %}" class="text-decoration-none text-dark">
+                                    {{ producto.nombre }}
+                                </a>
+                            </h5>
+                            <p class="text-muted small">{{ producto.descripcion|truncatewords:10 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="product-price">${{ producto.precio }}</span>
+                                <small class="text-muted">Stock: {{ producto.stock }}</small>
+                            </div>
+                            {% if producto.promedio_rating > 0 %}
+                            <div class="rating mt-2">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= producto.promedio_rating %}
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                    {% else %}
+                                    <i class="bi bi-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <p class="text-muted mt-3">No se encontraron productos</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
