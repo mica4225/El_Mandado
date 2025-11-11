@@ -2,6 +2,8 @@ from pathlib import Path
 import os
 import dj_database_url
 
+ON_RENDER = 'RENDER' in os.environ
+
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -141,18 +143,24 @@ FILE_CHARSET = 'utf-8'
 # STATIC FILES
 # ========================================
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# Whitenoise para servir archivos estáticos
-if not DEBUG:
+# Configuración para Render (producción)
+if ON_RENDER:
+    DEBUG = False
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    # Configuración para local (desarrollo)
+    DEBUG = True
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 
 # ========================================
 # MEDIA FILES
 # ========================================
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # ========================================
 # CUSTOM USER

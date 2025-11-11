@@ -41,12 +41,6 @@
                             {% endfor %}
                         </div>
 
-                        <!-- Nota informativa -->
-                        <div class="alert alert-info-custom">
-                            <i class="bi bi-info-circle"></i>
-                            <strong>Nota:</strong> Podés elegir una categoría existente o crear una nueva escribiendo su nombre.
-                        </div>
-
                         <!-- Resto de los campos -->
                         {% for field in form %}
                             {% if field.name != 'categoria' and field.name != 'nueva_categoria' %}
