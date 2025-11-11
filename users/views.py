@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import CustomUserCreationForm, UserProfileForm
@@ -11,7 +12,11 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            
+            # --- CORRECCIÓN CLAVE AQUÍ ---
+            # Especifica el backend para evitar el error de múltiples backends
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend') 
+            
             messages.success(request, f'¡Bienvenido {user.username}!')
             return redirect('home')
     else:
