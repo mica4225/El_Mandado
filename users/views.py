@@ -28,8 +28,13 @@ def login_view(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
+        
         if user:
-            login(request, user)
+            # --- CORRECCIÓN CLAVE AQUÍ ---
+            # Aunque authenticate() funciona, la función login() requiere el backend
+            # explícito debido a la configuración de allauth.
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend') 
+            
             next_url = request.GET.get('next', 'home')
             return redirect(next_url)
         else:
