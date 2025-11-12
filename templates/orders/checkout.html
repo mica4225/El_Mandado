@@ -12,22 +12,61 @@
         <div class="col-lg-8 mb-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <h4 class="text-dark-brown mb-4">Datos de Envío</h4>
-                    
                     <form method="post">
                         {% csrf_token %}
                         
-                        {% for field in form %}
-                        <div class="mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label">
-                                {{ field.label }}
-                            </label>
-                            {{ field }}
-                            {% for error in field.errors %}
-                            <div class="text-danger small">{{ error }}</div>
+                        <!-- ✅ TIPO DE ENTREGA -->
+                        <h4 class="text-dark-brown mb-4">📦 ¿Cómo querés recibir tu pedido?</h4>
+                        
+                        <div class="mb-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="delivery-option">
+                                        <input type="radio" name="tipo_entrega" id="retiro" value="retiro" checked class="d-none">
+                                        <label for="retiro" class="delivery-card">
+                                            <div class="text-center p-4">
+                                                <i class="bi bi-house-door fs-1 text-green"></i>
+                                                <h5 class="mt-3 mb-2">Retiro en Domicilio</h5>
+                                                <p class="text-muted small mb-0">Retirás en: {{ vendedor_direccion }}</p>
+                                                <p class="text-success fw-bold mt-2">GRATIS</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="delivery-option">
+                                        <input type="radio" name="tipo_entrega" id="envio" value="envio" class="d-none">
+                                        <label for="envio" class="delivery-card">
+                                            <div class="text-center p-4">
+                                                <i class="bi bi-truck fs-1 text-green"></i>
+                                                <h5 class="mt-3 mb-2">Envío a Domicilio</h5>
+                                                <p class="text-muted small mb-0">Te lo llevamos a tu casa</p>
+                                                <p class="text-muted small mt-2">Costo según distancia</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ✅ CAMPOS DE DIRECCIÓN (solo si elige envío) -->
+                        <div id="campos-envio" style="display: none;">
+                            <h4 class="text-dark-brown mb-4">📍 Dirección de Entrega</h4>
+                            
+                            {% for field in form %}
+                                {% if field.name != 'tipo_entrega' %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {{ field.label }}
+                                    </label>
+                                    {{ field }}
+                                    {% for error in field.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                             {% endfor %}
                         </div>
-                        {% endfor %}
                         
                         <button type="submit" class="btn btn-primary-custom btn-lg w-100 mt-3">
                             <i class="bi bi-check-circle"></i> Continuar al Pago
@@ -51,6 +90,15 @@
                     
                     <hr>
                     <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>${{ cart.total }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2" id="costo-envio-display">
+                        <span>Envío:</span>
+                        <span class="text-success">A calcular</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
                         <strong class="fs-5">Total:</strong>
                         <strong class="fs-5 text-green">${{ cart.total }}</strong>
                     </div>
@@ -59,4 +107,44 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.delivery-card {
+    border: 3px solid #dee2e6;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: block;
+    height: 100%;
+}
+
+.delivery-card:hover {
+    border-color: var(--color-green-medium);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(74, 124, 59, 0.2);
+}
+
+.delivery-option input:checked + .delivery-card {
+    border-color: var(--color-green-medium);
+    background-color: rgba(168, 198, 159, 0.1);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Mostrar/ocultar campos de envío según selección
+document.querySelectorAll('input[name="tipo_entrega"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const camposEnvio = document.getElementById('campos-envio');
+        if (this.value === 'envio') {
+            camposEnvio.style.display = 'block';
+        } else {
+            camposEnvio.style.display = 'none';
+        }
+    });
+});
+</script>
 {% endblock %}

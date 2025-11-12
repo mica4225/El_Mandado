@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}Chat - El Mandado{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-green text-white d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">
+                    <i class="bi bi-chat-dots"></i> 
+                    Chat con {{ otro_usuario.username }}
+                </h5>
+                <small>Orden #{{ conversacion.orden.pk }}</small>
+            </div>
+            <div>
+                <a href="{% url 'chat:conversation_list' %}" class="btn btn-light btn-sm">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+        
+        <div class="card-body" style="height: 350px; overflow-y: auto;" id="chat-messages">
+    {% for mensaje in mensajes %}
+        
+    {% if mensaje.remitente == request.user %}
+        {% comment %} TUS MENSAJES: Azul sobre blanco (bg-primary) {% endcomment %}
+        <div class="mb-3 text-end">
+            <div class="d-inline-block bg-danger text-white rounded p-3" style="max-width: 70%;">
+                <strong class="text-white">{{ mensaje.remitente.username }}</strong>
+                <p class="mb-1 text-white">{{ mensaje.texto }}</p>
+                <small class="text-white-50">{{ mensaje.creado_en|date:"d/m/Y H:i" }}</small>
+            </div>
+        </div>
+    {% else %}
+        {% comment %} MENSAJES DEL OTRO: Gris claro sobre negro (bg-light) {% endcomment %}
+        <div class="mb-3">
+            <div class="d-inline-block bg-light text-dark rounded p-3" style="max-width: 70%;">
+                <strong class="text-dark">{{ mensaje.remitente.username }}</strong>
+                <p class="mb-1 text-dark">{{ mensaje.texto }}</p>
+                <small class="text-muted">{{ mensaje.creado_en|date:"d/m/Y H:i" }}</small>
+            </div>
+        </div>
+    {% endif %}
+    
+    {% endfor %}
+</div>
+        
+        <div class="card-footer">
+            <form method="post" id="message-form">  
+            {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" 
+                        name="mensaje" 
+                        class="form-control" 
+                        placeholder="Escribí tu mensaje..."
+                        required
+                        autocomplete="off"
+                        id="messageInput"> 
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="bi bi-send"></i> Enviar
+                        </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    const chatMessages = document.getElementById('chat-messages');
+    
+    event.preventDefault();
+    // Auto-scroll al último mensaje al cargar la página
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // ID del último mensaje cargado desde el backend
+    // Usamos parseInt y comillas para compatibilidad
+    const currentUserId = parseInt("{{ request.user.pk }}"); 
+    let lastMessageId = parseInt("{{ ultimo_id|default:0 }}");
+
+
+    // ------------------------------------------------------------------
+    // FUNCIÓN DE POLLING (GET) - Recibe mensajes nuevos
+    // ------------------------------------------------------------------
+    setInterval(async () => {
+        try {
+            // conversacion.pk funciona porque la vista detail lo define
+            const response = await fetch("{% url 'chat:get_new_messages' conversacion.pk %}?last_id=" + lastMessageId);
+            
+            if (!response.ok) {
+                // Maneja errores de API (401, 500)
+                console.error('API GET Error:', response.status);
+                return;
+            }
+
+            const data = await response.json();
+
+            
+            if (data.mensajes && data.mensajes.length > 0) {
+        data.mensajes.forEach(msg => { 
+            // 🟢 ESTA ES LA UBICACIÓN CORRECTA (Dentro del forEach)
+            const currentUserId = parseInt("{{ request.user.pk }}"); // Se define fuera, pero la podemos usar aquí
+            const isOwn = msg.remitente_id === currentUserId; 
+            
+            // 🟢 CLASES UNIFICADAS: bg-yo para ti, bg-el para el otro
+            const align = isOwn ? 'text-end' : '';
+            const bgClass = isOwn ? 'bg-mensages-yo' : 'bg-mensages-otro'; 
+            const textColorClass = 'text-white';
+
+            const messageHtml = `
+                <div class="mb-3 ${align}">
+                    <div class="d-inline-block ${bgClass} rounded p-3" style="max-width: 70%;">
+                        <strong class="${textColorClass}">
+                            ${msg.remitente__username}
+                        </strong>
+                        <p class="mb-1 ${textColorClass}">${msg.texto}</p>
+                        <small class="${isOwn ? 'text-white-50' : 'text-muted'}">
+                            ${new Date(msg.creado_en).toLocaleString('es-AR')}
+                        </small>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.insertAdjacentHTML('beforeend', messageHtml);
+            lastMessageId = msg.id; // Actualiza el ID dentro del bucle
+        }); // <-- Aquí se cierra el forEach
+        
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        } 
+    }catch (error) {
+            console.error('Error al cargar mensajes:', error);
+        }
+    }, 3000);
+
+
+    // ------------------------------------------------------------------
+    // FUNCIÓN DE ENVÍO (POST) - Inserta el mensaje inmediatamente
+    // ------------------------------------------------------------------
+    document.getElementById("message-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const messageInput = document.getElementById("messageInput");
+        const message = messageInput.value.trim();
+        const now = new Date(); // Usamos la hora local para la inserción inmediata
+        
+        if (message === "") return;
+
+        fetch("{% url 'chat:send_message' conversacion.pk %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                'Content-Type': 'application/x-www-form-urlencoded', 
+            },
+            body: new URLSearchParams({ mensaje: message })
+        })
+        .then(response => {
+            if (!response.ok) {
+                 return response.text().then(text => {
+                    console.error('Server response error. Status:', response.status);
+                    throw new Error(`Error en el servidor (${response.status}): ${text.substring(0, 100)}...`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+            const chatMessages = document.getElementById('chat-messages'); 
+            const now = new Date(); 
+        
+        // 🟢 SOLUCIÓN: Definir las clases directamente, ¡no se necesita 'isOwn'!
+            const bgClass = 'bg-mensages-yo'; // Clase para TUS mensajes
+            const textClass = 'text-white';   // Texto para TUS mensajes
+
+            const messageHtml = `
+                <div class="mb-3 text-end">
+                    <div class="d-inline-block ${bgClass} ${textClass} rounded p-3" style="max-width: 70%;">
+                        <strong class="${textClass}">${data.remitente__username}</strong>
+                        <p class="mb-1 ${textClass}">${data.texto}</p>
+                        <small class="text-white-50">
+                            ${now.toLocaleString('es-AR')}
+                        </small>
+                    </div>
+                </div>
+            `;
+                
+            chatMessages.insertAdjacentHTML('beforeend', messageHtml);
+                
+            messageInput.value = "";
+            chatMessages.scrollTop = chatMessages.scrollHeight; 
+            lastMessageId = data.id; 
+                
+            } else {
+                alert('Fallo al enviar: ' + (data.error || 'Desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error al enviar mensaje (final):', error);
+            alert('Error de red o sesión. Revisa la consola para detalles.');
+        });
+    });
+
+
+    // Enviar con Enter 
+    document.querySelector('input[name="mensaje"]').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('message-form').dispatchEvent(new Event('submit'));
+        }
+    });
+});
+</script>
+{% endblock %}

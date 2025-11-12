@@ -11,17 +11,40 @@ class Order(models.Model):
         ('completado', 'Completado'),
         ('cancelado', 'Cancelado'),
     )
+    DELIVERY_CHOICES = (
+        ('retiro', 'Retiro en domicilio del vendedor'),
+        ('envio', 'Envío a domicilio'),
+    )
     
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ordenes')
     estado = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendiente')
     total = models.DecimalField(max_digits=10, decimal_places=2)
     
-    # Datos de envío
+    tipo_entrega = models.CharField(
+        max_length=20,
+        choices=DELIVERY_CHOICES,
+        default='retiro',
+        verbose_name='Tipo de entrega'
+    )
+    
+    # ✅ NUEVO: Costo de envío
+    costo_envio = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name='Costo de envío'
+    )
+    
+    # Datos de envío (solo si tipo_entrega = 'envio')
     direccion_envio = models.TextField()
     ciudad = models.CharField(max_length=100)
     codigo_postal = models.CharField(max_length=10)
     telefono = models.CharField(max_length=20)
     notas = models.TextField(blank=True)
+    
+    # ✅ NUEVO: Coordenadas para calcular distancia
+    latitud = models.FloatField(null=True, blank=True)
+    longitud = models.FloatField(null=True, blank=True)
     
     # Timestamps
     creado_en = models.DateTimeField(auto_now_add=True)

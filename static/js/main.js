@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    console.log('🌿 Mercadito cargado correctamente');
+    console.log('🌿 El Mandado cargado correctamente');
 });
 
 // ===== CHANGE IMAGE FUNCTION (para galería de productos) =====

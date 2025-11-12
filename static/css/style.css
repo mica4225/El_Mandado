@@ -165,6 +165,11 @@ body {
 }
 
 /* ===== BADGES ===== */
+.bg-primary-custom {
+    background-color: #007bff; /* <--- Asegúrate de que el color sea oscuro */
+    color: #fff; /* Asegúrate de que el texto por defecto sea blanco si no usas text-white */
+}
+
 .bg-success-custom {
     background-color: var(--color-main-medium) !important;
 }
@@ -388,6 +393,17 @@ body {
 .bg-green {
     background-color: var(--color-main-medium) !important;
     color: white !important;
+}
+
+/* ===== TEXT MENSAJES ===== */
+.bg-mensages-yo {
+    background-color: #642F37 !important; 
+}
+
+/* MENSAJES DEL OTRO USUARIO (Ejemplo: Fondo claro, Texto oscuro) */
+.bg-mensages-otro {
+    background-color: #C0350F !important; 
+    color: #F7C767 !important; 
 }
 
 .bg-light-cream {

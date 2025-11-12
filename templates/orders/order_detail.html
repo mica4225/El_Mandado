@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load chat_extras %}
 
 {% block title %}Orden #{{ orden.pk }} - El  Mandado{% endblock %}
 
@@ -102,6 +103,37 @@
                     </p>
                 </div>
             </div>
+        <div class="card border-0 shadow-sm mt-3">
+    <div class="card-body p-4">
+        <h5 class="text-dark-brown mb-3">Chats por Vendedor</h5>
+        
+        {% regroup orden.items.all by vendedor as items_por_vendedor %}
+        
+        {% for grupo in items_por_vendedor %}
+            {% with vendedor_actual=grupo.grouper %}
+                {% if request.user == orden.usuario or request.user == vendedor_actual %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 {% if not forloop.last %}border-bottom pb-2{% endif %}">
+                        <p class="mb-0">Chat con **{{ vendedor_actual.username }}**</p>
+                        
+                        {% with conversacion_vendedor=orden.conversaciones.all|get_conversation_for_user:vendedor_actual %}
+                            {% if conversacion_vendedor %}
+                                <a href="{% url 'chat:conversation_detail' conversacion_vendedor.pk %}" class="btn btn-success btn-sm">
+                                    <i class="bi bi-chat-left-text"></i> Continuar
+                                </a>
+                            {% else %}
+                                <a href="{% url 'chat:start_conversation' orden.pk vendedor_actual.pk %}" class="btn btn-primary-custom btn-sm">
+                                    <i class="bi bi-chat-left-text"></i> Iniciar Chat
+                                </a>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+        {% empty %}
+            <p class="text-muted">No hay vendedores asociados a esta orden o no tienes permiso para chatear.</p>
+        {% endfor %}
+    </div>
+</div>
         </div>
     </div>
 </div>

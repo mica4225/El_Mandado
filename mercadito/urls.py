@@ -30,6 +30,7 @@ urlpatterns = [
     path('reviews/', include('reviews.urls')),
     path('scraping/', include('scraping.urls')),
     path('payments/', include('payments.urls')),
+    path('chat/', include('chat.urls')),
 ]
 
 if settings.DEBUG:

@@ -8,6 +8,13 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
             <li class="breadcrumb-item"><a href="{% url 'product_list' %}">Productos</a></li>
+            {% if producto.categoria %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'product_list' %}?categoria={{ producto.categoria.id }}">
+                    {{ producto.categoria.nombre }}
+                </a>
+            </li>
+            {% endif %}
             <li class="breadcrumb-item active">{{ producto.nombre }}</li>
         </ol>
     </nav>
@@ -115,6 +122,24 @@
             </button>
             {% endif %}
         </div>
+    </div>
+
+    <div class="row my-4">
+    <div class="col-12">
+        <div class="d-flex gap-2 justify-content-center">
+            <a href="{% url 'product_list' %}" class="btn btn-outline-primary-custom">
+                <i class="bi bi-arrow-left"></i> Ver Más Productos
+            </a>
+            {% if producto.categoria %}
+            <a href="{% url 'product_list' %}?categoria={{ producto.categoria.id }}" class="btn btn-outline-secondary">
+                <i class="bi bi-tag"></i> Más de {{ producto.categoria.nombre }}
+            </a>
+            {% endif %}
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-house"></i> Inicio
+            </a>
+        </div>
+    </div>
     </div>
     
 <!-- Reseñas -->
@@ -240,6 +265,44 @@
         </div>
     </div>
 </div>
+{% if productos_relacionados %}
+<div class="row mt-5">
+    <div class="col-12">
+        <h3 class="text-dark-brown mb-4">
+            <i class="bi bi-grid"></i> Productos Relacionados
+        </h3>
+        <div class="row g-4">
+            {% for prod in productos_relacionados %}
+            <div class="col-md-6 col-lg-3">
+                <div class="product-card">
+                    <a href="{% url 'product_detail' prod.pk %}">
+                        {% if prod.imagen_principal %}
+                        <img src="{{ prod.imagen_principal.url }}" alt="{{ prod.nombre }}" class="product-img">
+                        {% else %}
+                        <img src="https://via.placeholder.com/300x300/a8c69f/2d5016?text=Sin+Imagen" 
+                             alt="{{ prod.nombre }}" 
+                             class="product-img">
+                        {% endif %}
+                    </a>
+                    <div class="product-body">
+                        <span class="badge bg-success-custom mb-2">{{ prod.categoria.nombre }}</span>
+                        <h5 class="product-title">
+                            <a href="{% url 'product_detail' prod.pk %}" class="text-decoration-none text-dark">
+                                {{ prod.nombre|truncatewords:5 }}
+                            </a>
+                        </h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="product-price">${{ prod.precio }}</span>
+                            <small class="text-muted">Stock: {{ prod.stock }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}

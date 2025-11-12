@@ -34,13 +34,21 @@ def product_list(request):
 
 def product_detail(request, pk):
     producto = get_object_or_404(Product, pk=pk, activo=True)
-    imagenes_adicionales = producto.imagenes.all()[:8]  # Máximo 8 imágenes
+    imagenes_adicionales = producto.imagenes.all()[:8]
     reviews = producto.reviews.all()
+    
+    # ✅ PRODUCTOS RELACIONADOS (misma categoría, excluyendo el actual)
+    productos_relacionados = Product.objects.filter(
+        categoria=producto.categoria,
+        activo=True,
+        stock__gt=0
+    ).exclude(pk=pk)[:4]  # Máximo 4 productos
     
     context = {
         'producto': producto,
         'imagenes': imagenes_adicionales,
         'reviews': reviews,
+        'productos_relacionados': productos_relacionados,  # ✅ NUEVO
     }
     return render(request, 'products/product_detail.html', context)
 
