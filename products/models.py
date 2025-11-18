@@ -50,7 +50,7 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     producto = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='imagenes')
-    imagen = models.ImageField(upload_to='products/gallery/')
+    imagen = models.ImageField(upload_to='marketplace_images/')
     orden = models.IntegerField(default=0)
     
     class Meta:

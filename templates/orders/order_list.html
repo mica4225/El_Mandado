@@ -20,16 +20,25 @@
                             <small class="text-muted">{{ orden.creado_en|date:"d/m/Y" }}</small>
                         </div>
                         <div class="col-md-2">
-                            {% if orden.estado == 'pendiente' %}
-                            <span class="badge bg-warning">Pendiente</span>
-                            {% elif orden.estado == 'enviado' %}
-                            <span class="badge bg-info">Enviado</span>
-                            {% elif orden.estado == 'completado' %}
-                            <span class="badge bg-success">Completado</span>
-                            {% else %}
-                            <span class="badge bg-danger">Cancelado</span>
-                            {% endif %}
-                        </div>
+    {% if orden.estado == 'PAGO_PENDIENTE' %}
+    <span class="badge bg-warning text-dark">Pendiente</span>
+
+    {% elif orden.estado == 'PAGADO' %}
+    <span class="badge bg-success">Acreditado</span>
+
+    {% elif orden.estado == 'ENVIADO' %}
+    <span class="badge bg-info text-dark">Enviado</span>
+
+    {% elif orden.estado == 'COMPLETADO' %}
+    <span class="badge bg-success">Entregado</span>
+
+    {% elif orden.estado == 'CANCELADO' %}
+    <span class="badge bg-danger">Cancelado</span>
+
+    {% else %}
+    <span class="badge bg-secondary">{{ orden.get_estado_display }}</span>
+    {% endif %}
+</div>
                         <div class="col-md-3">
                             <strong>Total:</strong> <span class="text-green">${{ orden.total }}</span>
                         </div>
@@ -37,7 +46,7 @@
                             <small class="text-muted">{{ orden.items.count }} producto(s)</small>
                         </div>
                         <div class="col-md-2 text-end">
-                            <a href="{% url 'order_detail' orden.pk %}" class="btn btn-outline-primary btn-sm">
+                            <a href="{% url 'orders:order_detail' orden.pk %}" class="btn btn-outline-primary btn-sm">
                                 Ver Detalles
                             </a>
                         </div>

@@ -1,3 +1,5 @@
+from dotenv import load_dotenv # 🟢 Importa la función
+load_dotenv()
 from pathlib import Path
 import os
 import dj_database_url
@@ -11,18 +13,37 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 # ========================================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-dev-key-change-in-production-12345')
+
+MP_APP_ID = os.getenv("MP_APP_ID")
+MP_CLIENT_SECRET = os.getenv("MP_CLIENT_SECRET")
+MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", default="")
+
+MONGO_ATLAS_URI = os.getenv("MONGO_ATLAS_URI", default="")
+
+MP_ACCESS_TOKEN_FOR_SDK = MP_ACCESS_TOKEN
+
+CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
+CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')
+CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
+
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
+NGROK_HOST = 'hyperconscientiously-organicismal-michele.ngrok-free.dev'
+MP_REDIRECT_URI = 'https://hyperconscientiously-organicismal-michele.ngrok-free.dev/orders/mp-callback/'
+
 # ALLOWED_HOSTS
+
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS = [RENDER_EXTERNAL_HOSTNAME, 'localhost', '127.0.0.1']
+    ALLOWED_HOSTS = [RENDER_EXTERNAL_HOSTNAME, 'localhost', '127.0.0.1', NGROK_HOST]
 else:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', NGROK_HOST]
 
-# CSRF
+# CSRF. Se inicializa siempre con el host de Ngrok
+CSRF_TRUSTED_ORIGINS = [f'http://{NGROK_HOST}',f'https://{NGROK_HOST}',]
+
 if RENDER_EXTERNAL_HOSTNAME:
-    CSRF_TRUSTED_ORIGINS = [f'https://{RENDER_EXTERNAL_HOSTNAME}']
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
 
 # ========================================
 # APPLICATIONS
@@ -55,6 +76,10 @@ INSTALLED_APPS = [
     'core',
     'static',
     'chat',
+    'utils',
+
+    'cloudinary',
+    'cloudinary_storage'
 ]
 
 # ========================================
@@ -75,7 +100,7 @@ MIDDLEWARE = [
 # ========================================
 # URLS Y WSGI
 # ========================================
-# 🔴 CAMBIAR "mercadito" por el nombre REAL de tu carpeta principal
+
 ROOT_URLCONF = 'mercadito.urls'
 WSGI_APPLICATION = 'mercadito.wsgi.application'
 
@@ -163,7 +188,7 @@ else:
 # ========================================
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # ========================================
 # CUSTOM USER
 # ========================================
@@ -242,3 +267,8 @@ if not DEBUG:
             'level': 'INFO',
         },
     }
+
+# CONFIGURACIONES DE SEGURIDAD PARA NGROK (HTTPS)
+# Esto le dice a Django que envíe cookies solo a través de HTTPS.
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True

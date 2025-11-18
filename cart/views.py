@@ -105,4 +105,4 @@ def buy_now(request, pk):
     messages.success(request, f'{cantidad}x {producto.nombre} listo para comprar')
     
     # Redirigir directamente al checkout
-    return redirect('checkout')
+    return redirect('orders:checkout')

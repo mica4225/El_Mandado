@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Pedido Confirmado #{{ order.pk }}{% endblock %}
+{% block content %}
+<div class="container text-center py-5">
+    <i class="bi bi-cash-stack display-1 text-success"></i>
+    <h2 class="mt-4">¡Orden #{{ order.pk }} Confirmada!</h2>
+    <p class="lead">El pago se realizará **en efectivo** al momento de retirar el producto.</p>
+    
+    <div class="alert alert-info">
+        La orden queda en estado "Pago Pendiente". El vendedor confirmará el pago y la entrega.
+    </div>
+    
+    <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-primary btn-lg mt-4">
+        Ver Detalles de mi Orden
+    </a>
+</div>
+{% endblock %}

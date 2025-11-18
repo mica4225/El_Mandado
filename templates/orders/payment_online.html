@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Pagar Orden #{{ order.pk }}{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <i class="bi bi-credit-card-2-front display-1 text-primary"></i>
+    <h2 class="mt-4">Finalizar Pago Online (Orden #{{ order.pk }})</h2>
+    
+    <p class="lead text-danger">⚠️ **ATENCIÓN: Flujo de Simulación Activo**</p>
+    <p>Para propósitos de demostración, elija simular un pago exitoso o fallido.</p>
+
+    {% csrf_token %} 
+    
+    <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+        {# 🥇 BOTÓN DE SIMULACIÓN EXITOSA 🥇 #}
+        <a href="{% url 'orders:simular_pago_exitoso' order.pk %}" class="btn btn-success btn-lg">
+            <i class="bi bi-check-circle"></i> SIMULAR PAGO EXITOSO
+        </a>
+
+        {# 🛑 BOTÓN DE SIMULACIÓN FALLIDA 🛑 #}
+        <a href="{% url 'orders:simular_pago_fallido' order.pk %}" class="btn btn-danger btn-lg">
+            <i class="bi bi-x-circle"></i> SIMULAR PAGO RECHAZADO
+        </a>
+    </div>
+
+    <p class="mt-4"><a href="{% url 'orders:order_detail' order.pk %}">Volver a los detalles de la orden</a></p>
+</div>
+{% endblock %}

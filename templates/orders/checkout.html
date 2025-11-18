@@ -67,10 +67,37 @@
                                 {% endif %}
                             {% endfor %}
                         </div>
-                        
+
+                        <h4 class="text-dark-brown mb-4">💳 Método de Pago</h4>
+
+                            <div class="mb-4">
+                                <div class="delivery-option">
+                                    <input type="radio" name="metodo_pago" id="pago_mp" value="MP" checked required class="d-none">
+                                    <label for="pago_mp" class="delivery-card">
+                                        <div class="text-center p-4">
+                                            <i class="bi bi-wallet2 fs-3 text-primary"></i>
+                                            <h5 class="mt-2 mb-1">Mercado Pago (Online)</h5>
+                                            <p class="text-muted small mb-0">Tarjeta, Rapipago, etc.</p>
+                                        </div>
+                                    </label>
+                                 </div>
+    
+                                <div class="delivery-option mt-3" id="efectivo-option" style="display: none;">
+                                    <input type="radio" name="metodo_pago" id="pago_ef" value="EF" class="d-none">
+                                    <label for="pago_ef" class="delivery-card">
+                                        <div class="text-center p-4">
+                                            <i class="bi bi-currency-dollar fs-3 text-success"></i>
+                                            <h5 class="mt-2 mb-1">Efectivo al Retirar</h5>
+                                                <p class="text-muted small mb-0">Solo disponible para Retiro.</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
                         <button type="submit" class="btn btn-primary-custom btn-lg w-100 mt-3">
                             <i class="bi bi-check-circle"></i> Continuar al Pago
                         </button>
+                        
                     </form>
                 </div>
             </div>
@@ -135,14 +162,21 @@
 
 {% block extra_js %}
 <script>
-// Mostrar/ocultar campos de envío según selección
+
 document.querySelectorAll('input[name="tipo_entrega"]').forEach(radio => {
     radio.addEventListener('change', function() {
         const camposEnvio = document.getElementById('campos-envio');
+        const efectivoOption = document.getElementById('efectivo-option');
+        const pagoMp = document.getElementById('pago_mp'); // Referencia a MP radio
+
         if (this.value === 'envio') {
             camposEnvio.style.display = 'block';
+            efectivoOption.style.display = 'none';
+            pagoMp.checked = true; // Forzar Mercado Pago para envío
         } else {
+            // Retiro
             camposEnvio.style.display = 'none';
+            efectivoOption.style.display = 'block'; // Mostrar opción de efectivo
         }
     });
 });

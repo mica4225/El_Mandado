@@ -1,4 +1,6 @@
 import math
+import googlemaps
+from django.conf import settings
 
 def calcular_distancia(lat1, lon1, lat2, lon2):
     """
@@ -69,12 +71,6 @@ def obtener_coordenadas_desde_codigo_postal(codigo_postal):
 
 # ✅ Para obtener coordenadas reales en producción, usar:
 def obtener_coordenadas_google(direccion):
-    """
-    Obtiene coordenadas usando Google Maps Geocoding API
-    Requiere: pip install googlemaps
-    """
-    import googlemaps
-    from django.conf import settings
     
     try:
         gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)

@@ -9,7 +9,7 @@
         <h2 class="text-dark-brown">
             <i class="bi bi-receipt"></i> Orden #{{ orden.pk }}
         </h2>
-        <a href="{% url 'download_order_summary' orden.pk %}" class="btn btn-primary-custom">
+        <a href="{% url 'orders:download_order_summary' orden.pk %}" class="btn btn-primary-custom">
             <i class="bi bi-download"></i> Descargar PDF
         </a>
     </div>
@@ -56,42 +56,66 @@
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body p-4">
                     <h5 class="text-dark-brown mb-3">Estado de la Orden</h5>
-                    {% if orden.estado == 'pendiente' %}
+                    
+                    {% if orden.estado == 'PAGO_PENDIENTE' %}
                     <div class="alert alert-warning">
                         <i class="bi bi-clock"></i> Pendiente de pago
                     </div>
-                    {% elif orden.estado == 'enviado' %}
+                    
+                    {% elif orden.estado == 'PAGADO' %}
+                <div class="alert alert-success">
+                    <i class="bi bi-cash-stack"></i> Pago Acreditado
+                </div>
+
+                    {% elif orden.estado == 'ENVIADO' %}
                     <div class="alert alert-info">
                         <i class="bi bi-truck"></i> En camino
                     </div>
-                    {% elif orden.estado == 'completado' %}
+
+                    {% elif orden.estado == 'COMPLETADO' %}
                     <div class="alert alert-success">
                         <i class="bi bi-check-circle"></i> Entregado
                     </div>
-                    {% else %}
+                    
+                    {% elif orden.estado == 'CANCELADO' %}
                     <div class="alert alert-danger">
                         <i class="bi bi-x-circle"></i> Cancelado
                     </div>
+                    
+                    {% else %}
+                    <div class="alert alert-secondary">
+                        <i class="bi bi-question-circle"></i> Estado Desconocido ({{ orden.get_estado_display }})
+                    </div>
                     {% endif %}
-                    
                     <hr>
-                    
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Subtotal:</span>
-                        <span>${{ orden.total }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Envío:</span>
-                        <span class="text-success">Gratis</span>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between">
-                        <strong class="fs-5">Total:</strong>
-                        <strong class="fs-5 text-green">${{ orden.total }}</strong>
-                    </div>
                 </div>
             </div>
             
+            <div class="card-body">
+            {% if orden.estado == 'PAGO_PENDIENTE' and orden.metodo_pago == 'MP' %}
+                <div class="alert alert-danger mt-4">
+                    El pago de esta orden aún no se acreditó o fue rechazado. 
+                    Podés intentarlo de nuevo ahora:
+                </div>
+
+                <a href="{% url 'orders:payment_online' order_id=orden.pk %}" 
+                   class="btn btn-primary btn-lg w-100 mt-2">
+                    <i class="bi bi-wallet2"></i> Pagar con Mercado Pago
+                </a>
+                
+            {% elif orden.estado == 'PAGADO' %}
+                <div class="alert alert-success mt-4">
+                    ✅ ¡Pago Acreditado! Tu orden está siendo preparada.
+                </div>
+    
+            {% elif orden.estado == 'PAGO_PENDIENTE' and orden.metodo_pago == 'EF' %}
+                <div class="alert alert-warning mt-4">
+                    Pago en Efectivo pendiente de confirmar al momento de la entrega.
+                </div>
+
+            {% endif %}
+        </div>
+
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <h6 class="text-dark-brown mb-3">Información</h6>

@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.db.models import Q
 from .models import Product, Category, ProductImage
 from .forms import ProductForm, ProductImageForm
+from utils.mongo_client import get_mongo_collection
+from datetime import datetime
 
 # Create your views here.
 
@@ -72,9 +74,32 @@ def product_create(request):
         if form.is_valid():
             producto = form.save(commit=False)
             producto.vendedor = request.user
-            producto.save()
+            producto.save() # Se guarda el producto en PostgreSQL
+
+            # ===================================================
+            # 🎯 PASO CLAVE: GUARDAR GEOLOCALIZACIÓN EN MONGODB 🎯
+            # ===================================================
+            # Se asume que el formulario tiene los campos 'latitude' y 'longitude'
+            lat = request.POST.get('latitude')
+            lon = request.POST.get('longitude')
+
+            if lat and lon:
+                geo_collection = get_mongo_collection('product_locations')
+                
+                if geo_collection:
+                    geoloc_data = {
+                        "product_id": producto.pk, # ID del producto en PostgreSQL
+                        "vendedor_id": request.user.pk,
+                        "lat": float(lat),
+                        "lon": float(lon),
+                        "timestamp": datetime.now()
+                    }
+                    geo_collection.insert_one(geoloc_data)
+            # ===================================================
+            
             messages.success(request, 'Producto creado correctamente')
-            return redirect('product_add_images', pk=producto.pk)
+            # Redirige a añadir imágenes (si es necesario) o a la vista de detalle
+            return redirect('product_add_images', pk=producto.pk) 
     else:
         form = ProductForm()
     
