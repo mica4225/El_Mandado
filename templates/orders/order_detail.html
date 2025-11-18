@@ -58,27 +58,27 @@
                     <h5 class="text-dark-brown mb-3">Estado de la Orden</h5>
                     
                     {% if orden.estado == 'PAGO_PENDIENTE' %}
-                    <div class="alert alert-warning">
+                    <div class="badge bg-warning">
                         <i class="bi bi-clock"></i> Pendiente de pago
                     </div>
                     
                     {% elif orden.estado == 'PAGADO' %}
-                <div class="alert alert-success">
+                <div class="badge bg-success">
                     <i class="bi bi-cash-stack"></i> Pago Acreditado
                 </div>
 
                     {% elif orden.estado == 'ENVIADO' %}
-                    <div class="alert alert-info">
+                    <div class="badge bg-info">
                         <i class="bi bi-truck"></i> En camino
                     </div>
 
                     {% elif orden.estado == 'COMPLETADO' %}
-                    <div class="alert alert-success">
+                    <div class="badge bg-success">
                         <i class="bi bi-check-circle"></i> Entregado
                     </div>
                     
                     {% elif orden.estado == 'CANCELADO' %}
-                    <div class="alert alert-danger">
+                    <div class="badge bg-danger">
                         <i class="bi bi-x-circle"></i> Cancelado
                     </div>
                     
@@ -93,23 +93,23 @@
             
             <div class="card-body">
             {% if orden.estado == 'PAGO_PENDIENTE' and orden.metodo_pago == 'MP' %}
-                <div class="alert alert-danger mt-4">
+                <div class="badge bg-warning mt-4">
                     El pago de esta orden aún no se acreditó o fue rechazado. 
                     Podés intentarlo de nuevo ahora:
                 </div>
 
                 <a href="{% url 'orders:payment_online' order_id=orden.pk %}" 
-                   class="btn btn-primary btn-lg w-100 mt-2">
+                   class="btn btn-primary-custom btn-lg w-100 mt-2">
                     <i class="bi bi-wallet2"></i> Pagar con Mercado Pago
                 </a>
                 
             {% elif orden.estado == 'PAGADO' %}
-                <div class="alert alert-success mt-4">
+                <div class="badge bg-success mt-4">
                     ✅ ¡Pago Acreditado! Tu orden está siendo preparada.
                 </div>
     
             {% elif orden.estado == 'PAGO_PENDIENTE' and orden.metodo_pago == 'EF' %}
-                <div class="alert alert-warning mt-4">
+                <div class="badge bg-warning mt-4">
                     Pago en Efectivo pendiente de confirmar al momento de la entrega.
                 </div>
 
@@ -127,37 +127,38 @@
                     </p>
                 </div>
             </div>
+
         <div class="card border-0 shadow-sm mt-3">
-    <div class="card-body p-4">
-        <h5 class="text-dark-brown mb-3">Chats por Vendedor</h5>
+            <div class="card-body p-4">
+                <h5 class="text-dark-brown mb-3">¿Necesitas hablar con el vendedor para confirmar detalle? Chatea con tu vendedor</h5>
         
-        {% regroup orden.items.all by vendedor as items_por_vendedor %}
+                {% regroup orden.items.all by vendedor as items_por_vendedor %}
         
-        {% for grupo in items_por_vendedor %}
-            {% with vendedor_actual=grupo.grouper %}
-                {% if request.user == orden.usuario or request.user == vendedor_actual %}
-                    <div class="d-flex justify-content-between align-items-center mb-2 {% if not forloop.last %}border-bottom pb-2{% endif %}">
-                        <p class="mb-0">Chat con **{{ vendedor_actual.username }}**</p>
-                        
-                        {% with conversacion_vendedor=orden.conversaciones.all|get_conversation_for_user:vendedor_actual %}
-                            {% if conversacion_vendedor %}
-                                <a href="{% url 'chat:conversation_detail' conversacion_vendedor.pk %}" class="btn btn-success btn-sm">
-                                    <i class="bi bi-chat-left-text"></i> Continuar
-                                </a>
-                            {% else %}
-                                <a href="{% url 'chat:start_conversation' orden.pk vendedor_actual.pk %}" class="btn btn-primary-custom btn-sm">
-                                    <i class="bi bi-chat-left-text"></i> Iniciar Chat
-                                </a>
-                            {% endif %}
-                        {% endwith %}
-                    </div>
-                {% endif %}
-            {% endwith %}
-        {% empty %}
-            <p class="text-muted">No hay vendedores asociados a esta orden o no tienes permiso para chatear.</p>
-        {% endfor %}
-    </div>
-</div>
+                {% for grupo in items_por_vendedor %}
+                    {% with vendedor_actual=grupo.grouper %}
+                        {% if request.user == orden.usuario or request.user == vendedor_actual %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 {% if not forloop.last %}border-bottom pb-2{% endif %}">
+                                <p class="mb-0">Chat con **{{ vendedor_actual.username }}**</p>
+
+                                {% with conversacion_vendedor=orden.conversaciones.all|get_conversation_for_user:vendedor_actual %}
+                                    {% if conversacion_vendedor %}
+                                        <a href="{% url 'chat:conversation_detail' conversacion_vendedor.pk %}" class="btn btn-success btn-sm">
+                                            <i class="bi bi-chat-left-text"></i> Continuar
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'chat:start_conversation' orden.pk vendedor_actual.pk %}" class="btn btn-primary-custom btn-sm">
+                                            <i class="bi bi-chat-left-text"></i> Iniciar Chat
+                                        </a>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% empty %}
+                    <p class="text-muted">No hay vendedores asociados a esta orden o no tienes permiso para chatear.</p>
+                {% endfor %}
+            </div>
+        </div>
         </div>
     </div>
 </div>

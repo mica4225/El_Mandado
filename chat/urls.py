@@ -9,4 +9,5 @@ urlpatterns = [
     path('<int:pk>/send/', views.send_message, name='send_message'),
     path('iniciar/<int:order_id>/<int:vendedor_id>/', views.start_conversation, name='start_conversation'),
     path('api/mensajes/<int:conversation_id>/', views.get_new_messages, name='get_new_messages'),
+    path('start/<int:recipient_id>/', views.start_conversation, name='start_conversation'),
 ]
