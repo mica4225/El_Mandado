@@ -93,9 +93,10 @@
                         <strong class="fs-5 text-green">${{ cart.total }}</strong>
                     </div>
                     
-                    <a href="{% url 'checkout' %}" class="btn btn-primary-custom w-100 mb-2">
+                    <a href="{% url 'orders:checkout' %}" class="btn btn-primary-custom w-100 mb-2">
                         <i class="bi bi-credit-card"></i> Finalizar Compra
                     </a>
+                    
                     <a href="{% url 'product_list' %}" class="btn btn-outline-secondary w-100">
                         <i class="bi bi-arrow-left"></i> Seguir Comprando
                     </a>
