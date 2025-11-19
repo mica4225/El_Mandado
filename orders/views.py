@@ -52,6 +52,17 @@ def checkout(request):
         messages.error(request, 'Tu carrito está vacío.')
         return redirect('cart_view')
     
+    # 1. Chequea si algún ítem en el carrito pertenece al usuario actual
+    is_seller_of_own_product = any(
+        item.producto.vendedor == request.user 
+        for item in cart.items.all()
+    )
+    
+    if is_seller_of_own_product:
+        messages.error(request, 'No puedes comprar productos que tú mismo vendes.')
+        return redirect('cart_view')
+    
+    
     for item in cart.items.all():
         if item.producto.stock < item.cantidad:
             messages.error(request, f'Stock insuficiente para {item.producto.nombre}')

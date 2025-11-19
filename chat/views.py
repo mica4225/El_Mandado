@@ -43,8 +43,6 @@ def conversation_detail(request, pk):
     # Obtener el ID del último mensaje para la actualización AJAX
     ultimo_id = mensajes.last().id if mensajes.exists() else 0
 
-    if not mensajes.exists():
-        return HttpResponse(f"ERROR: La conversación {pk} no tiene mensajes para el usuario {request.user.username}.")
     
     return render(request, 'chat/conversation_detail.html', {
         'conversacion': conversacion,
@@ -56,48 +54,41 @@ def conversation_detail(request, pk):
 
 @login_required
 def start_conversation(request, order_id, vendedor_id):
-    # Definimos la clase del modelo de usuario
     User = get_user_model() 
     
     order = get_object_or_404(Order, pk=order_id)
-    
-    # Usamos la clase User
     vendedor = get_object_or_404(User, pk=vendedor_id) 
-    
-    comprador = order.usuario 
+    comprador = order.usuario # Asumiendo que order.usuario es el comprador
+
     user = request.user
     
-    # 1. Determinar quién es quién
-    if user == comprador:
-        user1 = comprador
-        user2 = vendedor
-    elif user == vendedor:
-        user1 = vendedor
-        user2 = comprador
-    else:
-        # El usuario logueado no es ni comprador ni vendedor.
+    # 1. Validación de Permisos (Mejorada)
+    # Solo el comprador de la orden O el vendedor del producto pueden acceder.
+    if user != comprador and user != vendedor:
         return redirect('home') 
     
-    # 2. Buscar si ya existe una conversación (Usando comprador/vendedor si tu modelo los tiene)
-    # Nota: Tu modelo debe tener los campos 'comprador' y 'vendedor' o usar 'participantes'
-    # Si Conversation tiene campos directos:
-    # conversacion = Conversation.objects.filter(order=order, comprador=comprador, vendedor=vendedor).first()
-    
-    # Si Conversation usa ManyToManyField 'participantes':
+    # 2. Buscar si ya existe una conversación
+    # Usamos los tres campos que definen la unicidad en tu modelo.
     conversacion = Conversation.objects.filter(
-        order=order,
-        participantes=user1
-    ).filter(
-        participantes=user2
+        orden=order,
+        comprador=comprador,
+        vendedor=vendedor
     ).first()
     
     # 3. Si no existe, crearla
     if not conversacion:
-        # Asegúrate de crear la conversación con los campos correctos (order, comprador, vendedor)
-        # o añadir participantes si usas ManyToManyField.
-        # Asumo que usas ManyToManyField 'participantes' basado en tu código.
-        conversacion = Conversation.objects.create(order=order)
-        conversacion.participantes.add(user1, user2)
+        conversacion = Conversation.objects.create(
+            orden=order,
+            comprador=comprador,
+            vendedor=vendedor
+        )
+        
+        # Opcional: Crear un mensaje inicial para avisar que el chat está abierto
+        # Message.objects.create(
+        #    conversacion=conversacion,
+        #    remitente=user, # Quien inició el chat
+        #    texto=f"¡Hola! El chat para la orden #{order.pk} está abierto. ¿En qué podemos ayudarte?"
+        # )
         
     # 4. Redirigir a la vista de detalle de la conversación
     return redirect('chat:conversation_detail', pk=conversacion.pk)

@@ -7,22 +7,23 @@
     <h2 class="text-dark-brown mb-4">
         <i class="bi bi-credit-card"></i> Finalizar Compra
     </h2>
-    
+
     <div class="row">
         <div class="col-lg-8 mb-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <form method="post">
+                    <form method="post" autocomplete="off">
                         {% csrf_token %}
-                        
-                        <!-- ✅ TIPO DE ENTREGA -->
+
+                        <!-- TIPO DE ENTREGA -->
                         <h4 class="text-dark-brown mb-4">📦 ¿Cómo querés recibir tu pedido?</h4>
-                        
+
                         <div class="mb-4">
                             <div class="row g-3">
+                                <!-- Retiro -->
                                 <div class="col-md-6">
                                     <div class="delivery-option">
-                                        <input type="radio" name="tipo_entrega" id="retiro" value="retiro" checked class="d-none">
+                                        <input type="radio" name="tipo_entrega" id="retiro" value="retiro" class="d-none">
                                         <label for="retiro" class="delivery-card">
                                             <div class="text-center p-4">
                                                 <i class="bi bi-house-door fs-1 text-green"></i>
@@ -33,6 +34,8 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                <!-- Envío -->
                                 <div class="col-md-6">
                                     <div class="delivery-option">
                                         <input type="radio" name="tipo_entrega" id="envio" value="envio" class="d-none">
@@ -48,11 +51,11 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- ✅ CAMPOS DE DIRECCIÓN (solo si elige envío) -->
+
+                        <!-- CAMPOS DE DIRECCIÓN (solo si elige envío) -->
                         <div id="campos-envio" style="display: none;">
                             <h4 class="text-dark-brown mb-4">📍 Dirección de Entrega</h4>
-                            
+
                             {% for field in form %}
                                 {% if field.name != 'tipo_entrega' %}
                                 <div class="mb-3">
@@ -68,11 +71,22 @@
                             {% endfor %}
                         </div>
 
+                        <!-- ALERTA DE SELECCION DE ENTREGA -->
+                        <div id="guia-pago-alerta" class="alert alert-info text-center" role="alert">
+                            👋 ¡Hola! Primero seleccioná cómo querés recibir tu pedido para ver los métodos de pago.
+                        </div>
+
+                        <!-- METODO DE PAGO -->
                         <h4 class="text-dark-brown mb-4">💳 Método de Pago</h4>
 
+                        <!-- CONTENEDOR QUE SE OCULTA Y MUESTRA -->
+                        <div id="opciones-pago-wrapper" style="display: none;">
+
                             <div class="mb-4">
+
+                                <!-- Mercado Pago (siempre visible cuando se abre el wrapper) -->
                                 <div class="delivery-option">
-                                    <input type="radio" name="metodo_pago" id="pago_mp" value="MP" checked required class="d-none">
+                                    <input type="radio" name="metodo_pago" id="pago_mp" value="MP" class="d-none">
                                     <label for="pago_mp" class="delivery-card">
                                         <div class="text-center p-4">
                                             <i class="bi bi-wallet2 fs-3 text-primary"></i>
@@ -80,41 +94,53 @@
                                             <p class="text-muted small mb-0">Tarjeta, Rapipago, etc.</p>
                                         </div>
                                     </label>
-                                 </div>
-    
+                                </div>
+
+                                <!-- Efectivo (solo para retiro) -->
                                 <div class="delivery-option mt-3" id="efectivo-option" style="display: none;">
                                     <input type="radio" name="metodo_pago" id="pago_ef" value="EF" class="d-none">
                                     <label for="pago_ef" class="delivery-card">
                                         <div class="text-center p-4">
                                             <i class="bi bi-currency-dollar fs-3 text-success"></i>
                                             <h5 class="mt-2 mb-1">Efectivo al Retirar</h5>
-                                                <p class="text-muted small mb-0">Solo disponible para Retiro.</p>
+                                            <p class="text-muted small mb-0">Solo disponible para Retiro.</p>
                                         </div>
                                     </label>
                                 </div>
+
                             </div>
-                            
-                        <button type="submit" class="btn btn-primary-custom btn-lg w-100 mt-3">
-                            <i class="bi bi-check-circle"></i> Continuar al Pago
-                        </button>
-                        
+
+                        </div>
+
+                        <!-- BOTONES -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+
+                            <a href="{% url 'cart_view' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Volver al Carrito
+                            </a>
+
+                            <button type="submit" class="btn btn-primary-custom btn-lg">
+                                Finalizar Compra y Pagar <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
-        
+
+        <!-- Resumen del pedido -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <h4 class="text-dark-brown mb-4">Resumen del Pedido</h4>
-                    
+
                     {% for item in cart.items.all %}
                     <div class="d-flex justify-content-between mb-2">
                         <span>{{ item.cantidad }}x {{ item.producto.nombre|truncatewords:3 }}</span>
                         <span>${{ item.subtotal }}</span>
                     </div>
                     {% endfor %}
-                    
+
                     <hr>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Subtotal:</span>
@@ -162,23 +188,52 @@
 
 {% block extra_js %}
 <script>
+document.addEventListener('DOMContentLoaded', function() {
 
-document.querySelectorAll('input[name="tipo_entrega"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        const camposEnvio = document.getElementById('campos-envio');
-        const efectivoOption = document.getElementById('efectivo-option');
-        const pagoMp = document.getElementById('pago_mp'); // Referencia a MP radio
+    const tipoEntregaRadios = document.querySelectorAll('input[name="tipo_entrega"]');
+    const camposEnvio = document.getElementById('campos-envio');
+    const efectivoOption = document.getElementById('efectivo-option');
+    const pagoEfectivoRadio = document.getElementById('pago_ef');
+    const pagoMpRadio = document.getElementById('pago_mp');
+    const guiaPagoAlerta = document.getElementById('guia-pago-alerta');
+    const opcionesPagoWrapper = document.getElementById('opciones-pago-wrapper');
 
-        if (this.value === 'envio') {
+    // Estado inicial
+    camposEnvio.style.display = 'none';
+    opcionesPagoWrapper.style.display = 'none';
+    efectivoOption.style.display = 'none';
+    guiaPagoAlerta.style.display = 'block';
+
+    if (pagoEfectivoRadio) pagoEfectivoRadio.checked = false;
+    if (pagoMpRadio) pagoMpRadio.checked = false;
+
+    function actualizarOpcionesEntrega() {
+        const seleccionado = document.querySelector('input[name="tipo_entrega"]:checked');
+        const valor = seleccionado ? seleccionado.value : null;
+
+        // Reset
+        if (pagoEfectivoRadio) pagoEfectivoRadio.checked = false;
+        if (pagoMpRadio) pagoMpRadio.checked = false;
+
+        camposEnvio.style.display = 'none';
+        opcionesPagoWrapper.style.display = 'none';
+        efectivoOption.style.display = 'none';
+        guiaPagoAlerta.style.display = 'block';
+
+        if (valor === 'envio') {
             camposEnvio.style.display = 'block';
-            efectivoOption.style.display = 'none';
-            pagoMp.checked = true; // Forzar Mercado Pago para envío
-        } else {
-            // Retiro
-            camposEnvio.style.display = 'none';
-            efectivoOption.style.display = 'block'; // Mostrar opción de efectivo
+            opcionesPagoWrapper.style.display = 'block';
+            pagoMpRadio.checked = true;
+            guiaPagoAlerta.style.display = 'none';
+
+        } else if (valor === 'retiro') {
+            opcionesPagoWrapper.style.display = 'block';
+            efectivoOption.style.display = 'block';
+            guiaPagoAlerta.style.display = 'none';
         }
-    });
+    }
+
+    tipoEntregaRadios.forEach(r => r.addEventListener('change', actualizarOpcionesEntrega));
 });
 </script>
 {% endblock %}

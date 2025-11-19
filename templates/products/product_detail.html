@@ -51,7 +51,7 @@
                 </div>
                 {% for img in imagenes %}
                 <div class="col-3">
-            {% if img.imagen %}  <!-- ✅ VALIDAR QUE EXISTA -->
+            {% if img.imagen %} 
             <img src="{{ img.imagen.url }}" 
                  class="img-thumbnail gallery-thumb" 
                  onclick="changeImage(this)">
